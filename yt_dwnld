@@ -1,0 +1,61 @@
+#!/bin/bash
+
+# here is specified, where to save output files
+mp3_dir="/home/$(whoami)/Music/Youtube_downloads"
+video_dir="/home/$(whoami)/Videos/Youtube_downloads"
+
+# decide what to do
+while test $# -gt 0; do
+        case "$1" in
+                -h|--help)
+                        echo "Youtube mp3 and video downloader"
+			echo "To show help use yt_dwnld -h"
+			echo "To download MP3 use yt_dwnld -f mp3 <url>"
+			echo "To download video use yt_dwnld -f video <url>"
+                        exit 0
+                        ;;
+                -v|--version)
+                        echo "Youtube mp3 and video downloader"
+			echo "Version 0.0.1"
+			exit 0
+                        ;;
+                -f|--format)
+			shift
+			if test $# -gt 0; then
+				echo "Export as " $1
+				if [ $1 == "mp3" ]; then
+					dwnld_dir=$mp3_dir
+					dwnld_format="--extract-audio --audio-format mp3"
+				fi
+
+				if [ $1 == "video" ]; then
+					dwnld_dir=$video_dir
+					dwnld_format=""
+				fi
+			else 
+				echo "No format specified in -f argument"
+                                exit 1
+			fi
+                        shift
+                        ;;
+		http*|www*)
+			echo "URL = " $1
+			url=$1
+			shift
+                        ;;
+                *)
+                        break
+                        ;;
+        esac
+done
+
+# check directory existance
+if [ ! -d $dwnld_dir ]; then
+  mkdir $dwnld_dir
+  echo "This direcotry didnt exist but it was created" 
+fi
+
+echo "====================================================="
+
+youtube-dl -o "$dwnld_dir/%(title)s.%(ext)s" $dwnld_format "$url"
+
